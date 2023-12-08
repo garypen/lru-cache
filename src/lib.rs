@@ -24,14 +24,10 @@ where
     /// Update the caching sequence to bring the key to the front
     /// O(n)
     pub fn get(&mut self, key: &K) -> Option<&V> {
-        let mut at_index = None;
-
-        for (idx, (entry_key, _entry_value)) in self.entries.iter().enumerate() {
-            if key == entry_key {
-                at_index = Some(idx);
-                break;
-            }
-        }
+        let at_index = self
+            .entries
+            .iter()
+            .position(|(entry_key, _entry_value)| entry_key == key);
 
         match at_index {
             Some(idx) => {
@@ -46,31 +42,24 @@ where
     /// value.
     /// O(n)
     pub fn put(&mut self, key: K, value: V) -> Option<V> {
-        let mut at_index = None;
-
-        if self.entries.len() == self.capacity {
-            let _ = self.entries.pop_back();
-        }
-
-        for (idx, (entry_key, _entry_value)) in self.entries.iter_mut().enumerate() {
-            if key == *entry_key {
-                at_index = Some(idx);
-                break;
-            }
-        }
+        let at_index = self
+            .entries
+            .iter()
+            .position(|(entry_key, _entry_value)| entry_key == &key);
 
         match at_index {
             Some(idx) => {
-                let mut v = self
-                    .entries
-                    .remove(idx)
-                    .expect("Must be present; invariant");
-                let ret = Some(v.1);
-                v.1 = value;
-                self.entries.push_front(v);
-                ret
+                self.entries.swap(idx, 0);
+                let v = self.entries.get_mut(0).expect("Must be present; invariant");
+                let mut new = (key, value);
+                std::mem::swap(v, &mut new);
+                Some(new.1)
             }
             None => {
+                // Only need to check limit if key isn't already present
+                if self.entries.len() == self.capacity {
+                    let _ = self.entries.pop_back();
+                }
                 self.entries.push_front((key, value));
                 None
             }
