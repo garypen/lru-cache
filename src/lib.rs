@@ -31,7 +31,11 @@ where
 
         match at_index {
             Some(idx) => {
-                self.entries.swap(idx, 0);
+                let pair = self
+                    .entries
+                    .remove(idx)
+                    .expect("must be present; invariant");
+                self.entries.push_front(pair);
                 self.entries.get(0).map(|(_key, value)| value)
             }
             None => None,
@@ -49,11 +53,14 @@ where
 
         match at_index {
             Some(idx) => {
-                self.entries.swap(idx, 0);
-                let v = self.entries.get_mut(0).expect("Must be present; invariant");
-                let mut new = (key, value);
-                std::mem::swap(v, &mut new);
-                Some(new.1)
+                let mut pair = self
+                    .entries
+                    .remove(idx)
+                    .expect("must be present; invariant");
+                let old_v = pair.1;
+                pair.1 = value;
+                self.entries.push_front(pair);
+                Some(old_v)
             }
             None => {
                 // Only need to check limit if key isn't already present
@@ -118,6 +125,8 @@ mod tests {
         assert_eq!(cache.get(&"d"), Some(&"D"));
         assert_eq!(cache.get(&"e"), Some(&"E"));
         assert_eq!(cache.get(&"f"), Some(&"F"));
+        let values: Vec<&str> = cache.iter().map(|&(_key, value)| value).collect();
+        assert_eq!(vec!["F", "E", "D", "C", "B"], values);
     }
 
     #[test]
