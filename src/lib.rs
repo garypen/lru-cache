@@ -31,12 +31,15 @@ where
 
         match at_index {
             Some(idx) => {
-                let pair = self
-                    .entries
-                    .remove(idx)
-                    .expect("must be present; invariant");
-                self.entries.push_front(pair);
-                self.entries.get(0).map(|(_key, value)| value)
+                // Small optimisation to avoid removing/pushing element 0
+                if idx != 0 {
+                    let pair = self
+                        .entries
+                        .remove(idx)
+                        .expect("must be present; invariant");
+                    self.entries.push_front(pair);
+                }
+                self.entries.front().map(|(_key, value)| value)
             }
             None => None,
         }
@@ -53,13 +56,24 @@ where
 
         match at_index {
             Some(idx) => {
-                let mut pair = self
-                    .entries
-                    .remove(idx)
-                    .expect("must be present; invariant");
-                let old_v = pair.1;
-                pair.1 = value;
-                self.entries.push_front(pair);
+                // Small optimisation to avoid removing/pushing element 0
+                let mut old_v;
+                if idx == 0 {
+                    old_v = value;
+                    let pair = self
+                        .entries
+                        .front_mut()
+                        .expect("must be present; invariant");
+                    std::mem::swap(&mut old_v, &mut pair.1);
+                } else {
+                    let mut pair = self
+                        .entries
+                        .remove(idx)
+                        .expect("must be present; invariant");
+                    old_v = pair.1;
+                    pair.1 = value;
+                    self.entries.push_front(pair);
+                }
                 Some(old_v)
             }
             None => {
