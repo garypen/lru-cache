@@ -1,13 +1,20 @@
 [package]
 name = "lru-cache"
 version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+edition = "2024"
 
 [dependencies]
+ahash = "0.8.11"
 
 [lib]
 name = "lru_cache"
 path = "src/lib.rs"
 
+[dev-dependencies]
+divan = "0.1.17"
+lru = "0.12.5"
+rand = "0.8.5"
+
+[[bench]]
+name = "bench"
+harness = false
