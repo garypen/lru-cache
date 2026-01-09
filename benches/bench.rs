@@ -13,9 +13,9 @@ fn my_cache(cache_size: usize) {
     for val in 0..(cache_size * 9 / 10) {
         cache.put(val, val);
     }
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     for _ in 0..(cache_size / 2) {
-        let val = rng.gen_range(0..cache_size);
+        let val = rng.random_range(0..cache_size);
         cache.get(&val);
     }
 }
@@ -26,9 +26,9 @@ fn other_cache(cache_size: usize) {
     for val in 0..(cache_size * 9 / 10) {
         cache.put(val, val);
     }
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     for _ in 0..(cache_size / 2) {
-        let val = rng.gen_range(0..cache_size);
+        let val = rng.random_range(0..cache_size);
         cache.get(&val);
     }
 }
