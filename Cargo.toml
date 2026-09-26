@@ -12,7 +12,7 @@ path = "src/lib.rs"
 
 [dev-dependencies]
 divan = "0.1.17"
-lru = "0.16.0"
+lru = "0.18.0"
 rand = "0.10.0"
 
 [[bench]]
